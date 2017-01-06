@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#include <iostream>
 #include <windows.h>
 #include <conio.h>
 #include "projhead.h"
-
-using namespace std;
 
 void showcal() {
 	//defining needed variables such as: time variables, months names and counter variables
@@ -16,14 +13,14 @@ void showcal() {
 	t = localtime(&rawtime);
 	int i, w, counter;
 	char *months[] = { "Jan","Feb","Mar","Apr","May","Jun",
-						"Jul","Aug","Sep","Oct","Nov","Dec" };
+		"Jul","Aug","Sep","Oct","Nov","Dec" };
 
 	//printing the top of calendar.
 	printf("%s %d\n", months[t->tm_mon], t->tm_year + 1900);
 	puts("\tSa\tSu\tMo\tTu\tWe\tTh\tFr");
 
 	//determinig what is the wday of first day of the month and printing the first day.
-	for (i = t->tm_mday, w = t->tm_wday; i != 0; i--, w--);
+	for (i = t->tm_mday, w = t->tm_wday; i != 1; w--, i--);
 	w %= 7;
 	w = w>0 ? w : -w;
 	switch (w) {
@@ -64,21 +61,21 @@ void showcal() {
 	//determining how many days are there in months.
 	int cofds;
 	switch (t->tm_mon) {
-	case 2:
+	case 1:
 		cofds = 28;
 		break;
-	case 1:
-	case 3:
-	case 5:
-	case 7:
-	case 8:
-	case 10:
-	case 11:
-		cofds = 31;
-		break;
+	case 0:
+	case 2:
 	case 4:
 	case 6:
+	case 7:
 	case 9:
+	case 10:
+		cofds = 31;
+		break;
+	case 3:
+	case 5:
+	case 8:
 		cofds = 30;
 		break;
 	}
@@ -112,6 +109,6 @@ void clr()
 {
 	pos(0, 0);
 	for (int j = 0; j < 10000; j++)
-		cout << ' ';//prints 10000 space characters
+		printf(" ");//prints 10000 space characters
 	pos(0, 0);//sets the cursor position in the top of the console
 }
