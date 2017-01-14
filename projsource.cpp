@@ -22,7 +22,7 @@ void color(int ForgC){
 }
 
 
-void showcal() {
+int showcal() {
 	//defining needed variables such as: time variables, months names and counter variables
 	struct tm *t;
 	time_t rawtime;
@@ -111,7 +111,7 @@ void showcal() {
 			printf("\n\t");
 	}
 	puts("");
-	return;
+	return t->tm_mday*10000 + (t->tm_mon+1)*100 + t->tm_year-100;
 }
 
 
