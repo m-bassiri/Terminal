@@ -186,7 +186,146 @@ int main() {
 			}
 			continue;
 		}
-		
+		//-------------------- > and >> command -------------------------
+		else if(strchr(command,'>')!=NULL){
+			struct stat st={0};
+			FILE *file,*detfile;
+			command[strlen(command)-1]='\0'; //terminating '\n' character
+			if(*(strchr(command,'>')+1)=='>'){ // >> command
+				char* part1=strtok(command,">>");
+				char* part2=strtok(NULL,">> ");
+				part1[strlen(part1)-1]='\0';
+				if (part2[0]=='/') part2++;
+				if (part1[0]=='/') part1++;
+				char *fname=(char*)malloc(500);
+				if (strcmp(curdir,"root"))
+					sprintf(fname,"%s/%s",&path[21],part2);
+				else sprintf(fname,"%s",part2);
+				//ls change
+				if(stat(fname,&st)==-1){
+					char *lsname=(char*)malloc(500);
+					if(!strcmp(curdir,"root"))
+						strcpy(lsname,"root.ls");
+					else
+						sprintf(lsname,"%s/%s.ls",&path[21],curdir);
+					FILE *ls=fopen(lsname,"a+");
+					fprintf(ls,"%s\t",part2);
+					free(lsname);
+					fclose(ls);	
+				}
+				//file change
+				if (stat(part1,&st)!=-1){
+					char *buffer=(char*)malloc(2000);
+					FILE *fp1=fopen(part1,"a+");
+					file=fopen(fname,"a+");
+					fgets(buffer,2000,fp1);
+					fprintf(file,buffer);
+					while(!feof(fp1)){
+						fgets(buffer,2000,fp1);
+						fprintf(file,buffer);
+					}
+					fclose(file);
+					fclose(fp1);
+					free(buffer);
+				}
+				else {
+				file=fopen(fname,"a+");
+				fprintf(file,part1);
+				fclose(file);
+				}
+				//details file
+				char* detname=(char*)malloc(20);
+				sprintf(detname,"%s.det",fname);
+				detfile=fopen(detname,"w+");
+				stat(fname,&st);//saving the stat of file in struct
+				fprintf(detfile,"Generator: %s\nPath: %s\nSize: %d Bytes\n",curuser,path,st.st_size);
+				fprintf(detfile,"Generation time: %sLast accsess time: %sLast modification time: %s",ctime(&st.st_ctime),ctime(&st.st_atime),ctime(&st.st_mtime));
+				fclose(detfile);
+				free (detname);
+				free(fname);
+				fprintf(his, "   *%s >> %s\n",part1,part2);
+				
+			}
+			else { // > command
+				char *part1=strtok(command," > ");
+				char *part2=strtok(NULL," > ");
+				part1[strlen(part1)-1]='\0';
+				if (part2[0]=='/') part2++;
+				if (part1[0]=='/') part1++;
+				char *fname=(char*)malloc(500);
+				if (strcmp(curdir,"root"))
+					sprintf(fname,"%s/%s",&path[21],part2);
+				else sprintf(fname,"%s",part2);
+				//ls change
+				if(stat(fname,&st)==-1){
+					char *lsname=(char*)malloc(500);
+					if(!strcmp(curdir,"root"))
+						strcpy(lsname,"root.ls");
+					else
+						sprintf(lsname,"%s/%s.ls",&path[21],curdir);
+					FILE *ls=fopen(lsname,"a+");
+					fprintf(ls,"%s\t",part2);
+					free(lsname);
+					fclose(ls);	
+				}
+				//file change
+				if (stat(part1,&st)!=-1){
+					char *buffer=(char*)malloc(2000);
+					FILE *fp1=fopen(part1,"a+");
+					file=fopen(fname,"w+");
+					fgets(buffer,2000,fp1);
+					fprintf(file,buffer);
+					while(!feof(fp1)){
+						fgets(buffer,2000,fp1);
+						fprintf(file,buffer);
+					}
+					fclose(file);
+					fclose(fp1);
+					free(buffer);
+				}
+				else {
+				file=fopen(fname,"w+");
+				fprintf(file,part1);
+				fclose(file);
+				}
+				//details file
+				char* detname=(char*)malloc(20);
+				sprintf(detname,"%s.det",fname);
+				detfile=fopen(detname,"w+");
+				stat(fname,&st);//saving the stat of file in struct
+				fprintf(detfile,"Generator: %s\nPath: %s\nSize: %d Bytes\n",curuser,path,st.st_size);
+				fprintf(detfile,"Generation time: %sLast accsess time: %sLast modification time: %s",ctime(&st.st_ctime),ctime(&st.st_atime),ctime(&st.st_mtime));
+				fclose(detfile);
+				free (detname);
+				free(fname);
+				fprintf(his, "   *%s > %s\n",part1,part2);
+			}
+			continue;
+		}
+		//------------------- exif command ----------------------------
+		else if (!strncmp(command,"exif ",5)){
+			command[strlen(command)-1]='\0'; //terminating '\n' character
+			char *dettemp=(char*)malloc(500);
+			char *detname=(char*)malloc(50);
+			if (command[5]!='/') sprintf(detname,"%s.det",&command[5]);
+			else sprintf(detname,"%s.det",&command[6]);
+			FILE *det=fopen(detname,"r");
+			rewind(det);
+			if(det==NULL)
+				puts("No such file!");
+			else {
+				fgets(dettemp,500,det);
+				while(!feof(det)){
+					printf("%s",dettemp);
+					fgets(dettemp,500,det);
+				}
+			}
+			free(detname);
+			fclose(det);
+			free(dettemp);
+			continue;
+		}
+		//--------------
 		else printf("Wrong command!\n");
 	}
 	return 0;
