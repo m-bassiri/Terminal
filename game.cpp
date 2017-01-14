@@ -110,10 +110,26 @@ int main ()
 	switch (level){
 	case 1:
 		while(!feof(stdin)){
-			printf("%s\n%s","please inter moghtasat","inter x: ");
+			printf("%s\n%s","please inter Coordinate","inter x: ");
 			scanf("%d",&x);
+			while(!feof(stdin)){
+				if(x > 0 && x < 10)
+					break;
+				else{
+					printf("%s\n%s","please inter right Coordinate!!!","inter x again : ");
+					scanf("%d",&x);
+				}
+			}
 			printf("inter y: ");
 			scanf("%d",&y);
+			while(!feof(stdin)){
+				if(y > 0 && y < 10)
+					break;
+				else{
+					printf("%s\n%s","please inter right Coordinate!!!","inter y again : ");
+					scanf("%d",&y);
+				}
+			}
 			x--;
 			y--;
 			if(type1[x][y] == 0){
@@ -141,7 +157,7 @@ int main ()
 						}
 					}
 					printf("\n");
-					printf("\n");
+					
 				}
 			}
 			else{
@@ -161,10 +177,26 @@ int main ()
 		break;
 	case 2:
 		while(!feof(stdin)){
-			printf("%s\n%s","please inter moghtasat","inter x: ");
+			printf("%s\n%s","please inter Coordinate","inter x: ");
 			scanf("%d",&x);
+			while(!feof(stdin)){
+				if(x > 0 && x < 17)
+					break;
+				else{
+					printf("%s\n%s","please inter right Coordinate!!!","inter x again : ");
+					scanf("%d",&x);
+				}
+			}
 			printf("inter y: ");
 			scanf("%d",&y);
+			while(!feof(stdin)){
+				if(y > 0 && y < 17)
+					break;
+				else{
+					printf("%s\n%s","please inter right Coordinate!!!","inter y again : ");
+					scanf("%d",&y);
+				}
+			}
 			x--;
 			y--;
 			if(type1[x][y] == 0)
@@ -194,7 +226,7 @@ int main ()
 						}
 					}
 					printf("\n");
-					printf("\n");
+		
 				}
 			}
 			else{
@@ -216,12 +248,29 @@ int main ()
 
 
 		while(!feof(stdin)){
-			printf("%s\n%s","please inter moghtasat","inter x: ");
+			printf("%s\n%s","please inter Coordinate","inter x: ");
 			scanf("%d",&x);
+			while(!feof(stdin)){
+				if(x > 0 && x < 23)
+					break;
+				else{
+					printf("%s\n%s","please inter right Coordinate!!!","inter x again : ");
+					scanf("%d",&x);
+				}
+			}
 			printf("inter y: ");
 			scanf("%d",&y);
+			while(!feof(stdin)){
+				if(y > 0 && y < 23)
+					break;
+				else{
+					printf("%s\n%s","please inter right Coordinate!!!","inter y again : ");
+					scanf("%d",&y);
+				}
+			}
 			x--;
 			y--;
+			
 			if(type3[x][y] == 0)
 			{
 				lvlT3(T3,lvl3,type33,type3,x,y,sum);
@@ -250,7 +299,7 @@ int main ()
 						}
 					}
 					printf("\n");
-					printf("\n");
+					
 				}
 			}
 			else
