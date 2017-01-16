@@ -2,6 +2,43 @@
 #include <Windows.h>
 #include <time.h>
 
+void setColor(int ForgC)
+{
+    WORD wColor;
+    //We will need this handle to get the current background attribute
+    HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    //We use csbi for the wAttributes word.
+    if(GetConsoleScreenBufferInfo(hStdOut, &csbi))
+    {
+        //Mask out all but the background attribute, and add in the forgournd color
+        wColor = (csbi.wAttributes & 0xF0) + (ForgC & 0x0F);
+        SetConsoleTextAttribute(hStdOut, wColor);
+    }
+    return;
+}
+
+
+void pos(short C, short R)
+{
+	COORD xy;
+	xy.X = C;
+	xy.Y = R;
+	SetConsoleCursorPosition(
+		GetStdHandle(STD_OUTPUT_HANDLE), xy);
+}
+
+
+void clr()
+{
+	pos(0, 0);
+	for (int j = 0; j < 100; j++)
+		printf("                                                                             \n");//prints 10000 space characters
+	pos(0, 0);//sets the cursor position in the top of the console
+}
+
+
 int lvl (unsigned int level);
 
 int lvl1 (unsigned int type11[9][9],unsigned int type1[9][9],int x, int y,int sum);
@@ -29,14 +66,14 @@ int main ()
 	int sum = 0;
 	char str = 153;
 	char str1 = 223;
+	char str2 = 233;
+	int std;
 	int m1, m2, x, y;	
 	int pooch = 0;
 	unsigned int wrong = 0;
 	unsigned int level;
 	unsigned int type1 [9][9]={};
 	unsigned int type11[9][9]={};
-
-
 
 	for(int i = 0;i < 9;i++){
 		for(int j = 0;j < 9;j++){
@@ -59,7 +96,7 @@ int main ()
 		for(int j = 0;j < 22;j++){
 			type33[i][j] = 9;
 		}
-	}//tarif motaghayyer ha
+	}//end ...............................................
 
 	printf("%s\n%s\n%s\n%s\n%s","please choose level of game: "
 							,"level 1: 9 * 9"
@@ -70,7 +107,8 @@ int main ()
 
 	level = lvl(level);
 	
-	switch(level){
+	switch(level){//start bomb
+		
 	case 1:
 		for (int i = 0; i < 10;i++){
 			m1 = rand() % 9;
@@ -105,10 +143,29 @@ int main ()
 				type3 [m1][m2] = 1;
 			}
 		}
-	}
+	}//end bomb
 	//start game with x & y
+	clr();
+	std = 0;
 	switch (level){
 	case 1:
+		printf("\n\n\n\n\n\n");
+		for(int j = 0;j < 9;j++){
+			printf("                    ");
+			for(int i = 0;i < 9;i++){
+				if (type11[i][j] == 0)
+					printf("%c ",str);
+				else{
+					if(type11[i][j] == 9)
+						printf("%c ",str1);
+					else
+					{
+						printf("%u ",type11[i][j]);
+					}
+				}
+			}
+			printf("\n");
+		}
 		while(!feof(stdin)){
 			printf("%s\n%s","please inter Coordinate","inter x: ");
 			scanf("%d",&x);
@@ -120,6 +177,10 @@ int main ()
 					scanf("%d",&x);
 				}
 			}
+			if(feof(stdin)){
+				std = 1;
+				break;
+			}
 			printf("inter y: ");
 			scanf("%d",&y);
 			while(!feof(stdin)){
@@ -130,8 +191,13 @@ int main ()
 					scanf("%d",&y);
 				}
 			}
+			if(feof(stdin)){
+				std = 1;
+				break;
+			}
 			x--;
 			y--;
+			clr();
 			if(type1[x][y] == 0){
 				lvlT1(T,lvl1,type11,type1,x,y,sum);			
 				for(int o = 0; o < 81; o++){
@@ -143,16 +209,18 @@ int main ()
 						}
 					}
 				}
+				printf("\n\n\n\n\n\n");
 				for(int j = 0;j < 9;j++){
+					printf("                    ");
 					for(int i = 0;i < 9;i++){
-						if (type11[j][i] == 0)
+						if (type11[i][j] == 0)
 							printf("%c ",str);
 						else{
-							if(type11[j][i] == 9)
+							if(type11[i][j] == 9)
 								printf("%c ",str1);
 							else
 							{
-								printf("%u ",type11[j][i]);
+								printf("%u ",type11[i][j]);
 							}
 						}
 					}
@@ -176,6 +244,24 @@ int main ()
 		}
 		break;
 	case 2:
+		printf("\n\n\n\n\n\n");
+		for(int j = 0;j < 16;j++){
+			printf("                    ");
+					for(int i = 0;i < 16;i++){
+						if (type22[i][j] == 0)
+							printf("%c ",str);
+						else{
+							if(type22[i][j] == 9)
+								printf("%c ",str1);
+							else
+							{
+								printf("%u ",type22[i][j]);
+							}
+						}
+					}
+					printf("\n");
+		
+				}
 		while(!feof(stdin)){
 			printf("%s\n%s","please inter Coordinate","inter x: ");
 			scanf("%d",&x);
@@ -187,6 +273,10 @@ int main ()
 					scanf("%d",&x);
 				}
 			}
+			if(feof(stdin)){
+				std = 1;
+				break;
+			}
 			printf("inter y: ");
 			scanf("%d",&y);
 			while(!feof(stdin)){
@@ -197,8 +287,13 @@ int main ()
 					scanf("%d",&y);
 				}
 			}
+			if(feof(stdin)){
+				std = 1;
+				break;
+			}
 			x--;
 			y--;
+			clr();
 			if(type1[x][y] == 0)
 			{
 				lvlT2(T2,lvl2,type22,type2,x,y,sum);
@@ -212,12 +307,14 @@ int main ()
 						}
 					}
 				}
+				printf("\n\n\n\n\n\n");
 				for(int j = 0;j < 16;j++){
+					printf("                    ");
 					for(int i = 0;i < 16;i++){
-						if (type22[j][i] == 0)
+						if (type22[i][j] == 0)
 							printf("%c ",str);
 						else{
-							if(type22[j][i] == 9)
+							if(type22[i][j] == 9)
 								printf("%c ",str1);
 							else
 							{
@@ -245,7 +342,23 @@ int main ()
 		}
 		break;
 	case 3:
-
+		printf("\n\n\n\n\n\n");
+		for(int j = 0;j < 22;j++){
+			printf("                    ");
+			for(int i = 0;i < 22;i++){
+				if (type33[i][j] == 0)
+					printf("%c ",str);
+				else{
+					if(type33[i][j] == 9)
+						printf("%c ",str1);
+					else
+					{
+						printf("%u ",type33[i][j]);
+					}
+				}
+			}
+			printf("\n");	
+		}
 
 		while(!feof(stdin)){
 			printf("%s\n%s","please inter Coordinate","inter x: ");
@@ -258,6 +371,10 @@ int main ()
 					scanf("%d",&x);
 				}
 			}
+			if(feof(stdin)){
+				std = 1;
+				break;
+			}
 			printf("inter y: ");
 			scanf("%d",&y);
 			while(!feof(stdin)){
@@ -268,9 +385,13 @@ int main ()
 					scanf("%d",&y);
 				}
 			}
+			if(feof(stdin)){
+				std = 1;
+				break;
+			}
 			x--;
 			y--;
-			
+			clr();
 			if(type3[x][y] == 0)
 			{
 				lvlT3(T3,lvl3,type33,type3,x,y,sum);
@@ -284,22 +405,22 @@ int main ()
 						}
 					}
 				}
+				printf("\n\n\n\n\n\n");
 				for(int j = 0;j < 22;j++){
+					printf("                    ");
 					for(int i = 0;i < 22;i++){
-						if (type33
-							[j][i] == 0)
+						if (type33[i][j] == 0)
 							printf("%c ",str);
 						else{
-							if(type33[j][i] == 9)
+							if(type33[i][j] == 9)
 								printf("%c ",str1);
 							else
 							{
-								printf("%u ",type33[j][i]);
+								printf("%u ",type33[i][j]);
 							}
 						}
 					}
-					printf("\n");
-					
+					printf("\n");	
 				}
 			}
 			else
@@ -316,14 +437,248 @@ int main ()
 			}
 			if(pooch == 394)
 				break;
-			
 			}
 		break;
 		}
-	if(loser == 0)
-		printf("you win\n");
-	else
-		printf("you lose\n");
+	if(std == 1){
+		printf("%s\n%s\n%s\n","for exit press '1'","for seve and play later press '2'","keep on game press '3'");
+			scanf("%d",&std);
+			if(std == 1)
+				return 0;
+			else{
+				if(std == 2){
+
+				}
+				else{
+
+				}
+			}
+
+	}
+	else{
+	if(loser == 0){
+		printf("                                you win\n");
+if(level == 1){
+		for(int j = 0;j < 9;j++){
+		
+		for(int i = 0;i < 9;i++){
+				if (type1[i][j] == 1){
+					type11[i][j] = 10;
+				}
+			}
+		}
+		printf("\n\n\n\n\n\n");
+		for(int j = 0;j < 9;j++){
+			setColor(3);
+			printf("                    ");
+			for(int i = 0;i < 9;i++){
+				if (type11[i][j] == 0)
+					printf("%c ",str);
+				else{
+					if(type11[i][j] == 9)
+						printf("%c ",str1);
+					else{
+						if(type11[i][j] == 10){
+							setColor(5);
+							printf("%c ",str2);
+							setColor(3);
+						}
+						else
+						{
+							printf("%u ",type11[i][j]);
+						}
+					}
+				}
+			}
+			printf("\n");
+		}
+	}
+	else{
+		if(level == 2){
+			for(int j = 0;j < 16;j++){
+		
+		for(int i = 0;i < 16;i++){
+				if (type2[i][j] == 1){
+					type22[i][j] = 10;
+				}
+			}
+		}
+		printf("\n\n\n\n\n\n");
+			for(int j = 0;j < 16;j++){
+				setColor(3);
+				printf("                    ");
+					for(int i = 0;i < 16;i++){
+						if (type22[i][j] == 0)
+							printf("%c ",str);
+						else{
+							if(type22[i][j] == 9)
+								printf("%c ",str1);
+								else{
+									if(type22[i][j] == 10){
+										setColor(5);
+										printf("%c ",str2);
+										setColor(3);
+									}
+									else
+									{
+										printf("%u ",type22[i][j]);
+									}
+								}
+						}
+						
+					}
+					printf("\n");
+			}
+		}
+		else{
+			for(int j = 0;j < 22;j++){
+		
+				for(int i = 0;i < 22;i++){
+					if (type3[i][j] == 1){
+						type33[i][j] = 10;
+					}
+				}
+			}
+			printf("\n\n\n\n\n\n");
+			for(int j = 0;j < 22;j++){
+				setColor(3);
+				printf("                    ");
+				for(int i = 0;i < 22;i++){
+					if (type33[i][j] == 0)
+						printf("%c ",str);
+					else{
+						if(type33[i][j] == 9)
+							printf("%c ",str1);
+						else{
+							if(type33[i][j] == 10){
+								setColor(5);
+								printf("%c ",str2);
+								setColor(3);
+							}
+							else
+							{
+							printf("%u ",type33[i][j]);
+							}
+						}
+					}
+				}
+				printf("\n");
+			}
+		}
+	}
+	}
+	else{
+		printf("                                you lose");
+	if(level == 1){
+		for(int j = 0;j < 9;j++){
+		
+		for(int i = 0;i < 9;i++){
+				if (type1[i][j] == 1){
+					type11[i][j] = 10;
+				}
+			}
+		}
+		printf("\n\n\n\n\n\n");
+		for(int j = 0;j < 9;j++){
+			setColor(3);
+			printf("                    ");
+			for(int i = 0;i < 9;i++){
+				if (type11[i][j] == 0)
+					printf("%c ",str);
+				else{
+					if(type11[i][j] == 9)
+						printf("%c ",str1);
+					else{
+						if(type11[i][j] == 10){
+							setColor(5);
+							printf("%c ",str2);
+							setColor(3);
+						}
+						else
+						{
+							printf("%u ",type11[i][j]);
+						}
+					}
+				}
+			}
+			printf("\n");
+		}
+	}
+	else{
+		if(level == 2){
+			for(int j = 0;j < 16;j++){
+		
+		for(int i = 0;i < 16;i++){
+				if (type2[i][j] == 1){
+					type22[i][j] = 10;
+				}
+			}
+		}
+		printf("\n\n\n\n\n\n");
+			for(int j = 0;j < 16;j++){
+				setColor(3);
+				printf("                    ");
+					for(int i = 0;i < 16;i++){
+						if (type22[i][j] == 0)
+							printf("%c ",str);
+						else{
+							if(type22[i][j] == 9)
+								printf("%c ",str1);
+								else{
+									if(type22[i][j] == 10){
+										setColor(5);
+										printf("%c ",str2);
+										setColor(3);
+									}
+									else
+									{
+										printf("%u ",type22[i][j]);
+									}
+								}
+						}
+						
+					}
+					printf("\n");
+			}
+		}
+		else{
+			for(int j = 0;j < 22;j++){
+		
+				for(int i = 0;i < 22;i++){
+					if (type3[i][j] == 1){
+						type33[i][j] = 10;
+					}
+				}
+			}
+			printf("\n\n\n\n\n\n");
+			for(int j = 0;j < 22;j++){
+				setColor(3);
+				printf("                    ");
+				for(int i = 0;i < 22;i++){
+					if (type33[i][j] == 0)
+						printf("%c ",str);
+					else{
+						if(type33[i][j] == 9)
+							printf("%c ",str1);
+						else{
+							if(type33[i][j] == 10){
+								setColor(5);
+								printf("%c ",str2);
+								setColor(3);
+							}
+							else
+							{
+							printf("%u ",type33[i][j]);
+							}
+						}
+					}
+				}
+				printf("\n");
+			}
+		}
+	}
+	}
+	}
 	system("pause");
 }
 
@@ -506,5 +861,3 @@ void lvlT3(void T3 (int lvl3(unsigned int type33[22][22],unsigned int type3[22][
 		}
 	}
 }
-
-
