@@ -247,8 +247,8 @@ int main() {
 				
 			}
 			else { // > command
-				char *part1=strtok(command," > ");
-				char *part2=strtok(NULL," > ");
+				char *part1=strtok(command,">");
+				char *part2=strtok(NULL,"> ");
 				part1[strlen(part1)-1]='\0';
 				if (part2[0]=='/') part2++;
 				if (part1[0]=='/') part1++;
@@ -307,12 +307,16 @@ int main() {
 			command[strlen(command)-1]='\0'; //terminating '\n' character
 			char *dettemp=(char*)malloc(500);
 			char *detname=(char*)malloc(50);
-			if (command[5]!='/') sprintf(detname,"%s.det",&command[5]);
-			else sprintf(detname,"%s.det",&command[6]);
+			if (command[5]=='/') sprintf(detname,"%s.det",&command[6]);
+			else if (strcmp(curdir,"root"))
+					sprintf(detname,"%s/%s.det",&path[21],&command[5]);
+			else sprintf(detname,"%s.det",&command[5]);
 			FILE *det=fopen(detname,"r");
 			rewind(det);
-			if(det==NULL)
+			if(det==NULL){
 				puts("No such file!");
+				continue;
+			}
 			else {
 				fgets(dettemp,500,det);
 				while(!feof(det)){
@@ -323,9 +327,272 @@ int main() {
 			free(detname);
 			fclose(det);
 			free(dettemp);
+			fprintf(his, "   *%s\n",command);
 			continue;
 		}
-		//--------------
+		//------------------ cat command ----------------------------
+		else if (!strncmp(command,"cat ",4)){
+			command[strlen(command)-1]='\0'; //terminating '\n' character
+			char *fname=(char*)malloc(50);
+			char *ftemp=(char*)malloc(200);
+			if (command[4]=='/') sprintf(fname,"%s",&command[5]);
+			else if (strcmp(curdir,"root"))
+					sprintf(fname,"%s/%s",&path[21],&command[4]);
+			else sprintf(fname,"%s",&command[4]);
+			FILE *file=fopen(fname,"r");
+			fgets(ftemp,200,file);
+			puts(ftemp);
+			while(!feof(file)){
+				fgets(ftemp,200,file);
+				puts(ftemp);
+			}
+			fclose(file);
+			free(fname);
+			free(ftemp);
+			fprintf(his, "   *%s\n",command);
+			continue;
+		}
+		//------------------ rm -r command ---------------------------
+		else if (!strncmp(command,"rm -r ",6)){
+			command[strlen(command)-1]='\0'; //terminating '\n' character
+			struct stat st={0};
+			char *name=(char*)malloc(50);
+			char *lsname=(char*)malloc(50);
+			if (command[6]=='/') sprintf(name,"%s",&command[7]);
+			else if (strcmp(curdir,"root"))
+					sprintf(name,"%s/%s",&path[21],&command[6]);
+			else sprintf(name,"%s",&command[6]);
+			if(stat(name,&st)!=-1 && fopen(name,"r")==NULL){
+		 		deldir(name,&command[6]);
+		 		//ls change
+				if(!strcmp(curdir,"root"))
+					strcpy(lsname,"root.ls");
+				else
+					sprintf(lsname,"%s/%s.ls",&path[21],curdir);
+				FILE *ls=fopen(lsname,"r+");
+				char *ftemp=(char*)malloc(20);
+				while(!feof(ls)){
+					fscanf(ls,"%s",ftemp);
+					if(!strcmp(ftemp,&command[6])){
+						fseek(ls,-strlen(&command[6]),SEEK_CUR);
+						for(int i=0;i<strlen(&command[6]);i++)
+							fputc(' ',ls);
+						break;
+					}
+				}
+				free(ftemp);
+				fclose(ls);
+				free(lsname);
+			}
+			else puts("No such directory!");
+			free(name);
+			fprintf(his, "   *%s\n",command);
+			continue;
+		}
+		//--------------------- rm command ---------------------------
+		else if (!strncmp(command,"rm ",3)){
+			command[strlen(command)-1]='\0'; //terminating '\n' character
+			char *name=(char*)malloc(50);
+			char *detname=(char*)malloc(50);
+			char *lsname=(char*)malloc(50);
+			if (command[3]=='/') sprintf(name,"%s",&command[4]);
+			else if (strcmp(curdir,"root"))
+					sprintf(name,"%s/%s",&path[21],&command[3]);
+			else sprintf(name,"%s",&command[3]);
+			sprintf(detname,"%s.det",name);
+			FILE *file=fopen(name,"r");
+			if(file!=NULL){
+				fclose(file);
+		 		remove(name);
+		 		remove(detname);
+		 		//ls change
+				if(!strcmp(curdir,"root"))
+					strcpy(lsname,"root.ls");
+				else
+					sprintf(lsname,"%s/%s.ls",&path[21],curdir);
+				FILE *ls=fopen(lsname,"r+");
+				char *ftemp=(char*)malloc(20);
+				while(!feof(ls)){
+					fscanf(ls,"%s",ftemp);
+					if(!strcmp(ftemp,&command[3])){
+						fseek(ls,-strlen(&command[3]),SEEK_CUR);
+						for(int i=0;i<strlen(&command[3]);i++)
+							fputc(' ',ls);
+						break;
+					}
+				}
+				free(ftemp);
+				fclose(ls);
+				free(lsname);
+			}
+			else puts("No such file!");
+			free(detname);
+			free(name);
+			fprintf(his, "   *%s\n",command);
+			continue;
+		}
+		//-------------------- cp command -------------------------
+		else if (!strncmp(command,"cp ",3)){
+			command[strlen(command)-1]='\0'; //terminating '\n' character
+			strtok(command," ");
+			char *part1=strtok(NULL," "), *part2=strtok(NULL," ");
+			char *file1=(char*)malloc(100), *file2=(char*)malloc(100);
+			//file 1
+			if (part1[0]=='/') sprintf(file1,"%s",&part1[1]);
+			else if (strcmp(curdir,"root"))
+					sprintf(file1,"%s/%s",&path[21],part1);
+			else sprintf(file1,"%s",part1);
+			//file 2
+			if (part2[0]=='/') sprintf(file2,"%s",&part2[1]);
+			else if (strcmp(curdir,"root"))
+					sprintf(file2,"%s/%s",&path[21],part2);
+			else sprintf(file2,"%s",part2);
+			FILE *f1=fopen(file1,"r"), *f2=fopen(file2,"w");
+			if (f1!=NULL){
+				//copying file 1 to file 2
+				while(!feof(f1)){
+					char *buffer=(char*)malloc(1000);
+					fgets(buffer,1000,f1);
+					fprintf(f2,"%s\n",buffer);
+					free(buffer);
+				}
+				//creating det file
+				struct stat st={0};
+				char* detname=(char*)malloc(20);
+				sprintf(detname,"%s.det",file2);
+				FILE* detfile=fopen(detname,"w+");
+				stat(file2,&st);//saving the stat of file in struct
+				fprintf(detfile,"Generator: %s\nPath: %s\nSize: %d Bytes\n",curuser,path,st.st_size);
+				fprintf(detfile,"Generation time: %sLast accsess time: %sLast modification time: %s",ctime(&st.st_ctime),ctime(&st.st_atime),ctime(&st.st_mtime));
+				fclose(detfile);
+				free(detname);
+				//changing ls file
+				char *lsname=(char*)malloc(500);
+				if(part2[0]=='/'){ //for paths
+					char *temp=(char*)malloc(50);
+					sprintf(temp,"%s/t",part2);
+					sprintf(temp,"%s",predir(temp,"t"));
+					char* temp2=strstr(part2,temp);
+					sprintf(temp,"%s.ls",predir(part2,temp2));
+					sprintf(lsname,"%s/%s",&part2[1],temp);
+					sprintf(part2,temp2);
+					free(temp);
+				}
+				else if(!strcmp(curdir,"root"))
+					strcpy(lsname,"root.ls");
+				else
+					sprintf(lsname,"%s/%s.ls",&path[21],curdir);
+				FILE *ls=fopen(lsname,"a+");
+				fprintf(ls,"%s\t",part2);
+				free(lsname);
+				fclose(ls);	
+			}
+			else puts("No such file!");
+			fclose(f1);
+			fclose(f2);
+			free(file1);
+			free(file2);
+			fprintf(his, "   *%s\n",command);
+			continue;
+		}
+		//-------------------- mv command --------------------------
+		else if (!strncmp(command,"mv ",3)){
+			command[strlen(command)-1]='\0'; //terminating '\n' character
+			strtok(command," ");
+			char *part1=strtok(NULL," "), *part2=strtok(NULL," ");
+			char *file1=(char*)malloc(100), *file2=(char*)malloc(100);
+			//file 1
+			if (part1[0]=='/') sprintf(file1,"%s",&part1[1]);
+			else if (strcmp(curdir,"root"))
+					sprintf(file1,"%s/%s",&path[21],part1);
+			else sprintf(file1,"%s",part1);
+			//file 2
+			if (part2[0]=='/') sprintf(file2,"%s",&part2[1]);
+			else if (strcmp(curdir,"root"))
+					sprintf(file2,"%s/%s",&path[21],part2);
+			else sprintf(file2,"%s",part2);
+			FILE *f1=fopen(file1,"r"), *f2=fopen(file2,"w");
+			if (f1!=NULL){
+				//copying file 1 to file 2
+				while(!feof(f1)){
+					char *buffer=(char*)malloc(1000);
+					fgets(buffer,1000,f1);
+					fprintf(f2,"%s\n",buffer);
+					free(buffer);
+				}
+				//creating det file
+				struct stat st={0};
+				char* detname=(char*)malloc(20);
+				sprintf(detname,"%s.det",file2);
+				FILE* detfile=fopen(detname,"w+");
+				stat(file2,&st);//saving the stat of file in struct
+				fprintf(detfile,"Generator: %s\nPath: %s\nSize: %d Bytes\n",curuser,path,st.st_size);
+				fprintf(detfile,"Generation time: %sLast accsess time: %sLast modification time: %s",ctime(&st.st_ctime),ctime(&st.st_atime),ctime(&st.st_mtime));
+				fclose(detfile);
+				free(detname);
+				//changing ls file
+				char *lsname=(char*)malloc(500);
+				if(part2[0]=='/'){ //for paths
+					char *temp=(char*)malloc(50);
+					sprintf(temp,"%s/t",part2);
+					sprintf(temp,"%s",predir(temp,"t"));
+					char* temp2=strstr(part2,temp);
+					sprintf(temp,"%s.ls",predir(part2,temp2));
+					sprintf(lsname,"%s/%s",&part2[1],temp);
+					sprintf(part2,temp2);
+					free(temp);
+				}
+				else if(!strcmp(curdir,"root"))
+					strcpy(lsname,"root.ls");
+				else
+					sprintf(lsname,"%s/%s.ls",&path[21],curdir);
+				FILE *ls=fopen(lsname,"a+");
+				fprintf(ls,"%s\t",part2);
+				fclose(ls);
+				//deleting file 1
+				sprintf(detname,"%s.det",file1);
+				fclose(f1);
+		 		remove(file1);
+		 		remove(detname);
+		 		//ls change
+		 		if(part1[0]=='/'){ //for paths
+					char *temp=(char*)malloc(50);
+					sprintf(temp,"%s/t",part1);
+					sprintf(temp,"%s",predir(temp,"t"));
+					char* temp2=strstr(part1,temp);
+					sprintf(temp,"%s.ls",predir(part1,temp2));
+					sprintf(lsname,"%s/%s",&part1[1],temp);
+					sprintf(part1,temp2);
+					free(temp);
+				}
+				else if(!strcmp(curdir,"root"))
+					strcpy(lsname,"root.ls");
+				else
+					sprintf(lsname,"%s/%s.ls",&path[21],curdir);
+				ls=fopen(lsname,"r+");
+				char *ftemp=(char*)malloc(20);
+				while(!feof(ls)){
+					fscanf(ls,"%s",ftemp);
+					if(!strcmp(ftemp,&command[3])){
+						fseek(ls,-strlen(&command[3]),SEEK_CUR);
+						for(int i=0;i<strlen(&command[3]);i++)
+							fputc(' ',ls);
+						break;
+					}
+				}
+				free(ftemp);
+				fclose(ls);
+				free(lsname);
+				free(detname);
+			}
+			else puts("No such file!");
+			fclose(f2);
+			free(file1);
+			free(file2);
+			fprintf(his, "   *%s\n",command);
+			continue;
+		}
+		//-----
 		else printf("Wrong command!\n");
 	}
 	return 0;
