@@ -141,3 +141,38 @@ const char* predir(char path[], char curdir[]){
 		ret=temp;
 	return ret;
 }
+void deldir (const char *path, const char *curdir){
+	char *lsname=(char*)malloc(500);
+	sprintf(lsname,"%s/%s.ls",path,curdir);
+	FILE *ls=fopen(lsname,"r");
+	char *temp=(char*)malloc(20);
+	fscanf(ls,"%s",temp);
+	while(!feof(ls)){
+		char *temp2=(char*)malloc(50);
+		sprintf(temp2,"%s/%s",path,temp);
+		FILE *ftemp=fopen(temp2,"r");
+		if (ftemp==NULL){
+			char *recpath=(char*)malloc(500);
+			fclose(ftemp);
+			sprintf(recpath,"%s/%s",path,temp);
+			deldir(recpath,temp);
+			free(recpath);
+		}
+		else {
+			fclose(ftemp);
+			remove(temp2);
+			char *dettemp=(char*)malloc(500);
+			sprintf(dettemp,"%s.det",temp2);
+			remove(dettemp);
+			free(dettemp);
+		}
+		fscanf(ls,"%s",temp);
+		free(temp2);
+	}
+	fclose(ls);
+	free(temp);
+	remove(lsname);
+	rmdir(path);
+	free(lsname);
+	return;
+}
